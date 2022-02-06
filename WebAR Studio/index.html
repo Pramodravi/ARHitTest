@@ -1,0 +1,45 @@
+<html>
+<head>
+  <title>WebAR Login</title>
+  <link href="https://fonts.googleapis.com/css?family=Nunito:400,600,700" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+   
+</head>
+<body>
+
+  <div id="login_div" class="main-div">
+    <h3>WebAR Studio</h3>
+    <input type="email" placeholder="Email..." id="email_field" />
+    <input type="password" placeholder="Password..." id="password_field" />
+    <form action="userPage.html">
+    <button onclick="login()">Login</button>
+    </form>
+
+  </div>
+
+  <div id="user_div" class="loggedin-div">
+    <h3>Welcome User</h3>
+    <p id="user_para">Welcome to Firebase web login Example. You're currently logged in.</p>
+    
+    <button onclick="logout()">Logout</button>
+  </div>
+
+
+
+  <script src="https://www.gstatic.com/firebasejs/4.8.1/firebase.js"></script>
+  <script>
+    // Initialize Firebase
+    var config = {
+      apiKey: "AIzaSyBkL4BSkJ2Rxf9U5-nvJ4W11fq6zyA33nM",
+      authDomain: "webar-studio-85e60.firebaseapp.com",
+      databaseURL: "https://webar-studio-85e60.firebaseio.com",
+      projectId: "webar-studio-85e60",
+      storageBucket: "webar-studio-85e60.appspot.com",
+      messagingSenderId: "557125165553",
+    };
+    firebase.initializeApp(config);
+  </script>
+  <script src="index.js"></script>
+
+</body>
+</html>

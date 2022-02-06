@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset=UTF-8 />
+	
+</head>
+
+<body>
+	<h1>QR Code Generator</h1>
+	<span id="loading"></span>
+	<img src="Images/QR.png" alt="" id="Qr-img" />
+
+	<form action="QR.html">
+		<button>ARView</button>
+	</form>
+	<button id="qrbtn">Generate QR</button>
+	<script type="module">
+
+		import * as THREE from './three/build/three.module.js';
+
+		import { OrbitControls } from './three/examples/jsm/controls/OrbitControls.js';
+		import { GLTFLoader } from './three/examples/jsm/loaders/GLTFLoader.js';
+		import { RGBELoader } from './three/examples/jsm/loaders/RGBELoader.js';
+		let scene, camera, renderer;
+
+		init();
+		render();
+		var QRBtn = document.getElementById('qrbtn');
+
+		function init() {
+
+			const container = document.createElement('div');
+			document.body.appendChild(container);
+
+			camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.25, 20);
+			camera.position.set(- 1.8, 0.6, 2.7);
+
+			scene = new THREE.Scene();
+
+			new RGBELoader()
+				.setPath('../three/examples/textures/equirectangular/')
+				.load('white-background.hdr', function (texture) {
+
+					texture.mapping = THREE.EquirectangularReflectionMapping;
+
+					scene.background = texture;
+					scene.environment = texture;
+
+					render();
+
+					// model
+					var sessionString = sessionStorage.getItem('TheArray');
+					var Page2Array = JSON.parse(sessionString);
+					console.log(Page2Array);
+
+					const loader = new GLTFLoader();
+					loader.load(Page2Array, function (gltf) {
+
+						scene.add(gltf.scene);
+
+						render();
+
+					});
+
+				});
+
+			renderer = new THREE.WebGLRenderer({ antialias: true });
+			renderer.setPixelRatio(window.devicePixelRatio);
+			renderer.setSize(window.innerWidth, window.innerHeight);
+			renderer.toneMapping = THREE.ACESFilmicToneMapping;
+			renderer.toneMappingExposure = 1;
+			renderer.outputEncoding = THREE.sRGBEncoding;
+			container.appendChild(renderer.domElement);
+
+			const controls = new OrbitControls(camera, renderer.domElement);
+			controls.addEventListener('change', render); // use if there is no animation loop
+			controls.minDistance = 2;
+			controls.maxDistance = 10;
+			controls.target.set(0, 0, - 0.2);
+			controls.update();
+
+			window.addEventListener('resize', onWindowResize);
+
+		}
+
+		function onWindowResize() {
+
+			camera.aspect = window.innerWidth / window.innerHeight;
+			camera.updateProjectionMatrix();
+
+			renderer.setSize(window.innerWidth, window.innerHeight);
+
+			render();
+			update();
+
+		}
+		function update() {
+			requestAnimationFrame(update);
+			renderer.render(scene, camera);
+		}
+		//
+
+		function render() {
+
+			renderer.render(scene, camera);
+
+		}
+		var qr_img = document.getElementById("Qr-img");
+		QRBtn.onclick = function () {
+			var url = window.location.href;
+			var ApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${url}`;
+			qr_img.src = ApiUrl;
+		};
+
+
+
+	</script>
+</body>
+
+</html>
