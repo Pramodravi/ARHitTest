@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset=UTF-8 />
+</head>
+<style>
+	* {
+		margin: 0;
+		padding: 0;
+	}
+
+	html {
+		height: 100%;
+		width: 100%;
+	}
+
+	body {
+		height: 100%;
+		width: 100%;
+	}
+
+	model-viewer {
+		height: 100%;
+		width: 100%;
+	}
+</style>
+
+<body>
+
+
+	<script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js">
+	//<iframe id="myIframe" frameborder="0" marginwidth="0" marginheight="0" scrolling="NO" width="100%" height="100%"></iframe>
+	</script>
+
+	<!-- Use it like any other HTML element -->
+	<!--<model-viewer camera-controls src="https://firebasestorage.googleapis.com/v0/b/webar-studio-85e60.appspot.com/o/Arvind%2Fglb%2Funtitledglb?alt=media&token=4481458a-d192-4db8-b927-8be91c0cfe00" autoplay></model-viewer>-->
+	<button slot="ar-button" style="background-color: gray; border-radius: 2.5px; border:black; 
+    height: fit-content;
+    width: fit-content;
+	padding: 25px;
+    position: absolute; bottom: 25px; right: 25px; " >
+		Enable AR View
+	</button>
+
+	<model-viewer bounds="tight" camera-controls  ar ar-modes="webxr scene-viewer quick-look" 
+	autoplay camera-target="0m 0m 0m"environment-image="neutral"
+		shadow-intensity="1">
+		<div class="progress-bar hide" slot="progress-bar">
+			<div class="update-bar"></div>
+		</div>
+	</model-viewer>
+
+	<script>
+		var sessionString = sessionStorage.getItem('TheArray');
+		var Page2Array = JSON.parse(sessionString);
+		console.log(Page2Array);
+		const modelViewer = document.querySelector("model-viewer");
+		modelViewer.src = Page2Array;
+
+	</script>
+
+
+
+
+
+	</script>
+</body>
+
+</html>

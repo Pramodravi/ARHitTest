@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebAR Upload</title>
+    <style>
+        body {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            width: 100vw;
+            margin: 0px;
+            background: #fff;
+            background-image: url("/public/Images/BG.png");
+            padding: 0px;
+            margin: 0px;
+            font-family: 'Nunito', sans-seri;
+        }
+
+        button {
+            font-family: 'Nunito', sans-serif;
+            font-weight: 700;
+            background: #5d8ffc;
+            color: #fff;
+            border: 1px solid #5d8ffc;
+            border-radius: 5px;
+            padding: 7.5px;
+            display: flex;
+            width: 50%;
+            transition: 0.3s;
+            -webkit-transition: 0.3s;
+            -moz-transition: 0.3s;
+        }
+
+        input {
+            font-family: 'Nunito', sans-serif;
+            font-weight: 700;
+            display: flex;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background: #fff;
+            padding: 15px;
+            outline: none;
+            width: 100%;
+            margin-bottom: 20px;
+            transition: 0.3s;
+            -webkit-transition: 0.3s;
+            -moz-transition: 0.3s;
+        }
+
+        button:hover {
+            background: #fff;
+            color: #5d8ffc;
+            border: 1px solid #5d8ffc;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="container">
+        <label>Client Name</label><input list="clientid" name="client" id="ClientNameBox"><label id="client">
+            <datalist id="clientid">
+                <option id="clientName">Choose client</option>
+            </datalist>
+        </label> <br><br>
+        <label>.GLB/.USDZ</label>
+        <input type="text" id="namebox">
+        <label id="extlab"></label>
+        <button id="selbtn">Select</button> <br><br>  
+        <label for="scaleFixed"> Scale Fixed</label>
+        <input type="checkbox" id="scaleFixed" name="scaleFixed" value="bool">
+        <label for="WaterMark">Water Mark</label>
+        <input type="checkbox" id="WaterMark" name="WaterMark" value="bool">
+          
+        <file id="myFile"><label id="upprogress"></label> <br><br>     
+        <button id="upbtn">Upload File</button>
+        
+    </div>
+    <!--<button id="downbtn">Publish Model</button>-->
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.3.0/firebase-app.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBkL4BSkJ2Rxf9U5-nvJ4W11fq6zyA33nM",
+            authDomain: "webar-studio-85e60.firebaseapp.com",
+            databaseURL: "https://webar-studio-85e60-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "webar-studio-85e60",
+            storageBucket: "webar-studio-85e60.appspot.com",
+            messagingSenderId: "557125165553",
+            appId: "1:557125165553:web:2eba342a0b035d9ed2e450",
+            measurementId: "G-J7D664JSK1"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+
+        // Firebase Realtime database
+        import { getStorage, ref as sRef, uploadBytesResumable, getDownloadURL }
+            from "https://www.gstatic.com/firebasejs/9.3.0/firebase-storage.js"
+
+        // Firebase Realtime database
+        import { getDatabase, ref, set, child, get, update, remove }
+            from "https://www.gstatic.com/firebasejs/9.3.0/firebase-database.js";
+        const realdb = getDatabase();
+
+        //----VARIABLES & REFERENCES---//
+        var files = [];
+        var reader = new FileReader();
+
+        var namebox = document.getElementById('namebox');
+        var extlab = document.getElementById('extlab');
+        var myFile = document.getElementById('myFile');
+        var proglab = document.getElementById('upprogress');
+        var Selbtn = document.getElementById('selbtn');
+        var Upbtn = document.getElementById('upbtn');
+        var Downbtn = document.getElementById('downbtn');
+        var createClient = document.getElementById('ClientNameBox');
+
+        var input = document.createElement('input');
+        input.type = 'file';
+
+        input.onchange = e => {
+            files = e.target.files;
+
+            var extension = GetFileExt(files[0]);
+            var name = GetFileName(files[0]);
+
+            namebox.value = name;
+            extlab.innerHTML = extension;
+
+            reader.readAsDataURL(files[0]);
+        }
+
+        reader.onload = function () {
+            myFile.src = reader.result;
+        }
+
+        //----SELECTION---//
+        Selbtn.onclick = function () {
+            input.click();
+        }
+
+        function GetFileExt(file) {
+            var temp = file.name.split('.');
+            var ext = temp.slice((temp.length - 1), (temp.length));
+            return ext[0];
+        }
+
+        function GetFileName(file) {
+            var temp = file.name.split('.');
+            var fname = temp.slice(0, -1).join('.');
+            return fname;
+        }
+
+
+
+        let refUrl;
+        //----UPLOAD PROCESS---//
+        async function UploadProcess() {
+            var FileToUpload = files[0];
+
+            var FileName = namebox.value + extlab.innerHTML;
+            var clientName = ClientNameBox.value;
+            var ext = extlab.innerHTML;
+
+            const metaData = {
+                contentType: FileToUpload.type
+            }
+
+            const storage = getStorage();
+
+            const storageRef = sRef(storage, clientName + "/" + ext + "/" + FileName);
+
+
+            const UploadTask = uploadBytesResumable(storageRef, FileToUpload, metaData);
+
+            UploadTask.on('state-changed', (snapshot) => {
+                var progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                proglab.innerHTML = "Upload " + progress + "%";
+            },
+                (error) => {
+                    alert("error: File not uploaded!");
+                },
+                () => {
+                    getDownloadURL(UploadTask.snapshot.ref).then((downloadURL) => {
+                        SaveURLtoRealtimeDB(downloadURL);
+                        SetDownloadUrl(downloadURL);
+                    });
+                }
+            );
+
+        }
+
+        function SetDownloadUrl(url) {
+            sessionStorage.setItem('PublishModel', JSON.stringify(url));
+            console.log(url);
+            window.location.href = "PublishModelview.html";
+        }
+
+        /* Downbtn.onclick = function()
+         {
+             SetDownloadUrl(refUrl);
+         }*/
+
+        //----Functions for REALTIME DATABASE-----//
+
+        function SaveURLtoRealtimeDB(URL) {
+            var name = namebox.value;
+            var clientName = ClientNameBox.value;
+            var ext = extlab.innerHTML;
+
+            set(ref(realdb, "webAR/" + clientName + "/" + ext + "/" + name), {
+                FileName: (name + "." + ext),
+                ClientName: (clientName),
+                FileUrl: URL
+            });
+
+        }
+
+        function GetUrlfromRealtimeDB() {
+            var name = namebox.value;
+            var clientName = ClientNameBox.value;
+            var ext = extlab.innerHTML;
+
+            var dbRef = ref(realdb);
+            console.log(clientName);
+
+            get(child(dbRef, "webAR/" + clientName + "/" + ext + "/" + name)).then((snapshot) => {
+                if (snapshot.exists()) {
+                    myFile.src = snapshot.val().FileUrl;
+                    console.log(myFile.src);
+                }
+            })
+
+        }
+
+        function ValidateName() {
+            var regex = /[\.#$\[\]]/
+            return !(regex.test(namebox.value));
+        }
+
+        Upbtn.onclick = UploadProcess;
+
+
+
+        //choose client from dropdown
+        function GetAllDataOnce() {
+            const dbRef = ref(realdb);
+            get(child(dbRef, "webAR/"))
+                .then((snapshot) => {
+                    var clients = [];
+                    snapshot.forEach(childSnapshot => {
+                        clients.push(childSnapshot.key);
+                    });
+                    var select = document.getElementById("clientid");
+                    for (const val of clients) {
+                        var option = document.createElement("option");
+                        option.clients = val;
+                        option.text = val.charAt(0).toUpperCase() + val.slice(1);
+                        select.appendChild(option);
+                    }
+                    document.getElementById("container").appendChild(select);
+
+                });
+
+
+        }
+        window.onload = GetAllDataOnce;
+    </script>
+</body>
+
+</html>
