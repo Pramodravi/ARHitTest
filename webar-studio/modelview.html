@@ -56,7 +56,7 @@
                 AddItemToTable(SerialNo, element.ClientName, element.FileName, element.FileUrl);
                 url = element.FileUrl;
                 td4.onclick = function (url) {
-                    sessionStorage.setItem('TheArray', JSON.stringify(element.FileUrl));                    
+                    localStorage.setItem('TheArray', JSON.stringify(element.FileUrl));                    
                     window.location.href = 'WebviewPort.html';
                     //console.log(element.FileUrl);
                 };
