@@ -44,7 +44,7 @@
 	</button>
 
 	<model-viewer bounds="tight" camera-controls  ar ar-modes="webxr scene-viewer quick-look" 
-	autoplay camera-target="0m 0m 0m"environment-image="neutral"
+	autoplay camera-target="0m 0m 0m"environment-image="neutral" 
 		shadow-intensity="1">
 		<div class="progress-bar hide" slot="progress-bar">
 			<div class="update-bar"></div>
@@ -52,8 +52,8 @@
 	</model-viewer>
 
 	<script>
-		var sessionString = sessionStorage.getItem('TheArray');
-		var Page2Array = JSON.parse(sessionString);
+		var localString = localStorage.getItem('TheArray');
+		var Page2Array = JSON.parse(localString);
 		console.log(Page2Array);
 		const modelViewer = document.querySelector("model-viewer");
 		modelViewer.src = Page2Array;
